@@ -1,0 +1,2 @@
+
+az webapp create --resource-group vehiculos --plan containersb1 --name vehiculos-webapp --runtime "NODE|18-lts" --deployment-local-git

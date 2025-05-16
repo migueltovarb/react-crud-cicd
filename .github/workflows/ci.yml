@@ -1,0 +1,65 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main 
+      - develop
+  pull_request:
+    branches:
+      - main 
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+    
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20 
+
+
+      - name: Install dependencies
+        run: npm install
+
+
+ 
+        
+
+      - name: Run tests with coverage
+        run: |
+            npx vitest --coverage --coverage.reporter=text > coverage_report.txt
+        
+
+
+      - name: Check coverage threshold
+        run: |
+            coverage_percentage=$(grep -Po 'All files[^|]*\|\s*\K\d+\.\d+(?=\s*\|)' coverage_report.txt)
+        
+            threshold=80
+            if (( $(echo "$coverage_percentage < $threshold" | bc -l) )); then
+            echo "Coverage threshold not met. Coverage: $coverage_percentage%"
+            exit 1
+            else
+            echo "Coverage threshold met. Coverage: $coverage_percentage%"
+            fi
+          
+      
+
+
+      - name: Build application
+        run: npm run build
+
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build/
